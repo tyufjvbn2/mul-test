@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import formidable from "formidable";
 import path from "path";
+import fs from "fs";
 dotenv.config();
 
 const app = express();
@@ -59,31 +60,39 @@ router.post("/test", async (req, res) => {
 
 //formidable 파일 전송 테스트
 router.post("/file", async (req, res, next) => {
-	console.log("body", req);
+	const form = new formidable.IncomingForm();
 
-	const targetPath = path.join(__dirname, "../");
+	await form.parse(req, (err, fields, files: any) => {
+		// console.log("file", files.file.path);
+		const targetPath = path.join(
+			__dirname,
+			"../",
+			"/uploaded",
+			files.file.name
+		);
+		//중복 파일 체크해서 처리하는 로직도 필요
+		fs.rename(files.file.path, targetPath, (err) => {
+			if (err) {
+				console.log("rename error", err);
+				res.status(400).json({
+					message: "rename error",
+				});
+			}
+		});
 
-	const formOption = {
-		// multiples: true,
-		uploadDir: targetPath + "/uploaded",
-		keepExtensions: true,
-	};
-
-	const form = new formidable.IncomingForm(formOption);
-
-	await form.parse(req, (err, fields, files) => {
 		if (err) {
 			console.log("error occured : ", err);
 			// next(err)
 			res.status(400).json({
 				message: "error",
 			});
+		} else {
+			res.status(200).json({
+				message: "anyway done",
+				fields,
+				files,
+			});
 		}
-		res.status(200).json({
-			message: "anyway done",
-			fields,
-			files,
-		});
 	});
 
 	// res.status(200).json({
