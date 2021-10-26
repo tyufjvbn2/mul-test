@@ -60,7 +60,12 @@ router.post("/test", async (req, res) => {
 
 //formidable 파일 전송 테스트
 router.post("/file", async (req, res, next) => {
-	const form = new formidable.IncomingForm();
+	// const formOption = {
+	// 	maxFileSize: 300 * 1024 * 1024,
+	// };
+
+	//파일 사이즈 제한은 가변적으로 조절 가능
+	const form = new formidable.IncomingForm(/*formOption*/);
 
 	await form.parse(req, (err, fields, files: any) => {
 		//용량 큰 파일일때 에러남(file을 읽지 못함)
@@ -80,7 +85,7 @@ router.post("/file", async (req, res, next) => {
 			console.log("check", targetFile);
 
 			if (targetFile) {
-				console.log("file name is same");
+				console.log("same name file exist");
 				res.status(409).json({
 					message: "file name duplicated error",
 				});
