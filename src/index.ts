@@ -70,34 +70,44 @@ router.post("/file", async (req, res, next) => {
 			"/uploaded",
 			files.file.name
 		);
-		//중복 파일 체크해서 처리하는 로직도 필요
-		fs.rename(files.file.path, targetPath, (err) => {
-			if (err) {
-				console.log("rename error", err);
-				res.status(400).json({
-					message: "rename error",
-				});
-			}
-		});
 
-		if (err) {
-			console.log("error occured : ", err);
-			// next(err)
-			res.status(400).json({
-				message: "error",
+		//중복 파일 체크해서 처리하는 로직
+		const targetFile = fs.existsSync(targetPath);
+		console.log("check", targetFile);
+
+		if (targetFile) {
+			console.log("file name is same");
+			res.status(409).json({
+				message: "file name duplicated error",
 			});
 		} else {
-			res.status(200).json({
-				message: "anyway done",
-				fields,
-				files,
+			//파일 이름과 주소변경 처리
+			fs.rename(files.file.path, targetPath, (err) => {
+				//이름 주소 변경처리중 에러면 여기로
+				if (err) {
+					console.log("rename error", err);
+					res.status(409).json({
+						message: "rename error",
+					});
+				}
 			});
+			//파일 파싱하는 중에 에러면 여기로
+			if (err) {
+				console.log("error occured : ", err);
+				// next(err)
+				res.status(400).json({
+					message: "error",
+				});
+			} else {
+				//아무 문제 없으면 여기로
+				res.status(200).json({
+					message: "anyway done",
+					fields,
+					files,
+				});
+			}
 		}
 	});
-
-	// res.status(200).json({
-	// 	message: "anyway done always",
-	// });
 });
 
 app.listen(process.env.PORT, () => {
