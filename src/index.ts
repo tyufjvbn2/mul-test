@@ -1,6 +1,7 @@
 import express from "express";
 import * as dotenv from "dotenv";
 import nodemailer from "nodemailer";
+const sendmail = require("sendmail");
 import formidable from "formidable";
 import path from "path";
 import fs from "fs";
@@ -118,6 +119,34 @@ router.post("/file", async (req, res, next) => {
 			}
 		}
 	});
+});
+
+router.post("/mail", async (req, res) => {
+	try {
+		console.log("accept well");
+		const { title, content, email } = req.body;
+
+		sendmail(
+			{
+				from: "tyufjvbn22@gmail.com",
+				to: email,
+				subject: title,
+				html: content,
+			},
+			(err: any, reply: any) => {
+				if (err) {
+					console.log("error", err);
+					res.status(400).json({ message: "error", err });
+				} else {
+					console.log("done", reply);
+					res.status(200).json({ message: "done" });
+				}
+			}
+		);
+	} catch (err) {
+		console.error("error", err);
+		res.status(500).json({ message: err });
+	}
 });
 
 app.listen(process.env.PORT, () => {
