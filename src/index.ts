@@ -68,10 +68,13 @@ router.post("/file", async (req, res, next) => {
 	const form = new formidable.IncomingForm(/*formOption*/);
 
 	await form.parse(req, (err, fields, files: any) => {
+		// console.log("body", req);
+		console.log("body2", fields);
 		//용량 큰 파일일때 에러남(file을 읽지 못함)
 		if (!files.file) {
 			res.status(404).json({ message: "wrong type file" });
 		} else {
+			console.log("original file data : ", files.file);
 			console.log("file", files.file.name);
 			const targetPath = path.join(
 				__dirname,
@@ -113,6 +116,7 @@ router.post("/file", async (req, res, next) => {
 						message: "anyway done",
 						fields,
 						files,
+						path: targetPath,
 					});
 				}
 			}
