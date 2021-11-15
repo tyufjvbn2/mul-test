@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import formidable from "formidable";
 import path from "path";
 import fs from "fs";
+import aws from "aws-sdk";
 dotenv.config();
 
 const app = express();
@@ -122,6 +123,25 @@ router.post("/file", async (req, res, next) => {
 			}
 		}
 	});
+});
+
+router.post("/aws", async (req, res) => {
+	try {
+		const s3 = new aws.S3({
+			accessKeyId: process.env.AWS_ACCESS_KEY,
+			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+			region: "ap-northeast-2",
+		});
+
+		// let bucketParams = {
+		// 	Bucket: process.env.AWS_S3_BUCKET_NAME,
+		// 	key: `image/${fileName}`,
+		// 	body:fs
+		// };
+	} catch (err) {
+		console.error("error", err);
+		res.status(500).json({ message: err });
+	}
 });
 
 router.post("/mail", async (req, res) => {
